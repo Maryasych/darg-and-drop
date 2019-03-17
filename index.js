@@ -16,7 +16,7 @@ var upload = multer({
                 if (mimes.some(mime => mime == file.mimetype)) {
                         cb(null, true)
                     } else {
-                        cb(new Error("Недопустиме розширення файлу!"), false)
+                        cb("Недопустиме розширення файлу!")
                     };
                 },
                 storage: storage
@@ -30,7 +30,7 @@ var upload = multer({
         app.post('/upload', (req, res) => {
             upload(req, res, (err) => {
                 if (err) {
-                    res.sendStatus(415).send(err.message)
+                    res.send(err)
                 } else {
                     res.sendStatus(200)
                 }
