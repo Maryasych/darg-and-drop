@@ -25,4 +25,12 @@ function sendFile(e) {
     body: filesFetch
   }
     fetch('/upload', options)
+    .then(handleErrors)
+    .catch(error => alert(error));
+}
+function handleErrors(response){
+  if(!response.ok){ 
+    return response.text().then((errorText) => Promise.reject(errorText))
+  }
+  return response
 }

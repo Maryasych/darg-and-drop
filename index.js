@@ -30,7 +30,7 @@ var upload = multer({
         app.post('/upload', (req, res) => {
             upload(req, res, (err) => {
                 if (err) {
-                    res.send(err)
+                    res.status(415).send(err).status(415)
                 } else {
                     res.sendStatus(200)
                 }
