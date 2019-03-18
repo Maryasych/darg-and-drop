@@ -15,38 +15,53 @@ function opacityAndPreventDefault(e) {
 
 dragForm.addEventListener('drop', separateFiles)
 
-function separateFiles(e){
+function separateFiles(e) {
   let dt = e.dataTransfer;
   let files = dt.files;
-  Object.keys(files).forEach(file => sendFile(files[file]))
+  Object.keys(files).forEach(file => chaining(files[file]))
 }
 
-function sendFile(file) {  
+function chaining(file) {
   let filesFetch = new FormData();
-  filesFetch.append('file',file)
-  let options = {
-    method: "POST",
-    body: filesFetch
-  }
-  fetch('/upload', options)
-    .then(handleErrors)
-    .then(addThumbnail(file))
-    .catch(error => alert(error));
+  filesFetch.append('file', file)
+  uploadFile(filesFetch)
+    .then(resp => console.log(resp))
+    .catch(error => alert(error))
 }
 
-function handleErrors(response) {
-  if (!response.ok) {
-    return response.text().then((errorText) => Promise.reject(errorText))
-  }
-  return response
-};
 
-function addThumbnail(file) {
-  const img = document.createElement("img");
-  img.classList.add("obj");
-  img.file = file;
+function uploadFile(file) {
+  return new Promise(function (resolve, reject) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/upload', false);
+    xhr.onload = function () {
+      if (this.status == 200) {
+        resolve(this.responseText);
+      } else {
+        var error = new Error(this.response);
+        error.code = this.status;
+        reject(error);
+      }
+    };
+    xhr.onerror = function () {
+      reject(new Error("Network Error"));
+    };
+    xhr.send(file);
+  });
+}
+
+function addThumbnail(origFile) {
+  const img = document.createElement('img'),
+    progressBar = document.createElement('progress');
+  progressBar.setAttribute('min', 0)
+  img.file = origFile;
   gallery.appendChild(img);
+  gallery.appendChild(progressBar)
   const reader = new FileReader();
-  reader.onload = (function(aImg) { return function(e) { aImg.src = e.target.result; }; })(img);
-  reader.readAsDataURL(file);
+  reader.onload = (function (aImg) {
+    return function (e) {
+      aImg.src = e.target.result;
+    };
+  })(img);
+  reader.readAsDataURL(origFile);
 }
