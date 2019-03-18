@@ -1,0 +1,38 @@
+#dropzone {
+    border: 2px dashed #ccc;
+    border-radius: 20px;
+    width: 480px;
+    font-family: sans-serif;
+    margin: 100px auto;
+}
+input{
+    display: none;
+}
+label{
+    display: inline-block;
+    padding: 10px;
+    background: #ccc;
+    cursor: pointer;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+label:hover{
+    background: rgb(162, 160, 228);
+}
+form {
+    padding: 40px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    background: #c1afaf48;
+    align-items: center;
+}
+#gallery {
+    margin-top: 10px;
+}
+#gallery img {
+    width: 150px;
+    margin-bottom: 10px;
+    margin-right: 10px;
+    vertical-align: middle;
+}
