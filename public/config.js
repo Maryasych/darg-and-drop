@@ -13,20 +13,24 @@ function opacityAndPreventDefault(e) {
   e.stopPropagation()
 };
 
-dragForm.addEventListener('drop', sendFile)
+dragForm.addEventListener('drop', separateFiles)
 
-function sendFile(e) {
+function separateFiles(e){
   let dt = e.dataTransfer;
   let files = dt.files;
+  Object.keys(files).forEach(file => sendFile(files[file]))
+}
+
+function sendFile(file) {  
   let filesFetch = new FormData();
-  filesFetch.append('file', ...files)
+  filesFetch.append('file',file)
   let options = {
     method: "POST",
     body: filesFetch
   }
   fetch('/upload', options)
     .then(handleErrors)
-    .then(addThumb(files))
+    .then(addThumbnail(file))
     .catch(error => alert(error));
 }
 
@@ -37,9 +41,7 @@ function handleErrors(response) {
   return response
 };
 
-function addThumbnail(files) {
-  Object.keys(files).forEach(objFile => {
-   let file = files[objFile]
+function addThumbnail(file) {
   const img = document.createElement("img");
   img.classList.add("obj");
   img.file = file;
@@ -47,5 +49,4 @@ function addThumbnail(files) {
   const reader = new FileReader();
   reader.onload = (function(aImg) { return function(e) { aImg.src = e.target.result; }; })(img);
   reader.readAsDataURL(file);
-})
 }
