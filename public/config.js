@@ -24,13 +24,28 @@ function sendFile(e) {
     method: "POST",
     body: filesFetch
   }
-    fetch('/upload', options)
+  fetch('/upload', options)
     .then(handleErrors)
+    .then(addThumb(files))
     .catch(error => alert(error));
 }
-function handleErrors(response){
-  if(!response.ok){ 
+
+function handleErrors(response) {
+  if (!response.ok) {
     return response.text().then((errorText) => Promise.reject(errorText))
   }
   return response
+};
+
+function addThumbnail(files) {
+  Object.keys(files).forEach(objFile => {
+   let file = files[objFile]
+  const img = document.createElement("img");
+  img.classList.add("obj");
+  img.file = file;
+  gallery.appendChild(img);
+  const reader = new FileReader();
+  reader.onload = (function(aImg) { return function(e) { aImg.src = e.target.result; }; })(img);
+  reader.readAsDataURL(file);
+})
 }
