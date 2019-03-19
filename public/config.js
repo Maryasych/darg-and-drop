@@ -15,42 +15,41 @@ function opacityAndPreventDefault(e) {
   e.stopPropagation()
 };
 
-dragForm.addEventListener('drop', separateFiles)
-
-function separateFiles(e) {
+dragForm.addEventListener('drop', separateFiles = e => {
   let dt = e.dataTransfer;
   let files = dt.files;
   Object.keys(files).forEach(file => {
     iterator++
     chaining(files[file], iterator)
   })
-}
+});
 
-function chaining(file, i) {
+chaining = (file, i) => {
   let filesFetch = new FormData();
   filesFetch.append('file', file)
   uploadFile(filesFetch, file, i)
-}
+};
 
-function uploadFile(fileFetch, file, i) {
+uploadFile = (fileFetch, file, i) => {
   var xhr = new XMLHttpRequest();
   xhr.open('POST', '/upload');
   addThumbnail(file)
-  xhr.upload.onprogress = function (event) {
-    progressbars[i - 1].setAttribute('value', (event.loaded / event.total) * 100)
+  xhr.upload.onprogress = function (e) {
+    progressbars[i - 1].setAttribute('value', (e.loaded / e.total) * 100)
   }
   xhr.onload = function () {
-    if(this.status == 415){
+    if (this.status == 415) {
       progressbars[i - 1].classList.add('failed');
-      alert(this.responseText)
+      console.error(this.responseText)
     }
     if (this.status !== 200) {
       var error = new Error(this.response);
       error.code = this.status;
+      console.error(error.code)
     }
   };
   xhr.onerror = function () {
-    reject(new Error("Network Error"));
+    console.error(new Error("Network Error"));
   };
   xhr.send(fileFetch);
 }
@@ -69,7 +68,7 @@ createElements = (origFile) => {
   return [img, progressBar]
 }
 
-function addThumbnail(origFile) {
+addThumbnail = origFile => {
   let [img, progressBar] = createElements(origFile)
   progressbars.push(progressBar)
   const reader = new FileReader();
