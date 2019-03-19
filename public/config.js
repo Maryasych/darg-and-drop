@@ -1,5 +1,7 @@
 let dragForm = document.querySelector('form'),
-  gallery = document.querySelector('#gallery');
+  gallery = document.querySelector('#gallery'),
+  progressbars = [],
+  iterator = 0;
 
 ['dragover', 'dragleave', 'drop'].forEach(eventName => {
   dragForm.addEventListener(eventName, opacityAndPreventDefault)
@@ -18,45 +20,51 @@ dragForm.addEventListener('drop', separateFiles)
 function separateFiles(e) {
   let dt = e.dataTransfer;
   let files = dt.files;
-  Object.keys(files).forEach(file => chaining(files[file]))
+  Object.keys(files).forEach(file =>{
+    iterator++
+    chaining(files[file], iterator)
+    })
 }
 
-function chaining(file) {
+function chaining(file, i) {
   let filesFetch = new FormData();
   filesFetch.append('file', file)
-  uploadFile(filesFetch)
-    .then(resp => console.log(resp))
-    .catch(error => alert(error))
+  uploadFile(filesFetch, file, i)
 }
 
 
-function uploadFile(file) {
-  return new Promise(function (resolve, reject) {
+function uploadFile(fileFetch, file, i) {
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/upload', false);
+    xhr.open('POST', '/upload');
+    addThumbnail(file)
+    xhr.upload.onprogress = function(event){
+      progressbars[i-1].setAttribute('value', (event.loaded/event.total)*100)
+    }
     xhr.onload = function () {
       if (this.status == 200) {
-        resolve(this.responseText);
+       // resolve(this);
       } else {
         var error = new Error(this.response);
         error.code = this.status;
-        reject(error);
+        //reject(error);
       }
     };
     xhr.onerror = function () {
       reject(new Error("Network Error"));
     };
-    xhr.send(file);
-  });
+    xhr.send(fileFetch);
 }
 
 function addThumbnail(origFile) {
   const img = document.createElement('img'),
     progressBar = document.createElement('progress');
   progressBar.setAttribute('min', 0)
+  progressBar.setAttribute('max', 100)
   img.file = origFile;
   gallery.appendChild(img);
   gallery.appendChild(progressBar)
+  progressbars.push(progressBar)
+  console.log(progressbars)
   const reader = new FileReader();
   reader.onload = (function (aImg) {
     return function (e) {
