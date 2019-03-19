@@ -20,10 +20,10 @@ dragForm.addEventListener('drop', separateFiles)
 function separateFiles(e) {
   let dt = e.dataTransfer;
   let files = dt.files;
-  Object.keys(files).forEach(file =>{
+  Object.keys(files).forEach(file => {
     iterator++
     chaining(files[file], iterator)
-    })
+  })
 }
 
 function chaining(file, i) {
@@ -32,39 +32,46 @@ function chaining(file, i) {
   uploadFile(filesFetch, file, i)
 }
 
-
 function uploadFile(fileFetch, file, i) {
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', '/upload');
-    addThumbnail(file)
-    xhr.upload.onprogress = function(event){
-      progressbars[i-1].setAttribute('value', (event.loaded/event.total)*100)
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/upload');
+  addThumbnail(file)
+  xhr.upload.onprogress = function (event) {
+    progressbars[i - 1].setAttribute('value', (event.loaded / event.total) * 100)
+  }
+  xhr.onload = function () {
+    if(this.status == 415){
+      progressbars[i - 1].classList.add('failed');
+      alert(this.responseText)
     }
-    xhr.onload = function () {
-      if (this.status == 200) {
-       // resolve(this);
-      } else {
-        var error = new Error(this.response);
-        error.code = this.status;
-        //reject(error);
-      }
-    };
-    xhr.onerror = function () {
-      reject(new Error("Network Error"));
-    };
-    xhr.send(fileFetch);
+    if (this.status !== 200) {
+      var error = new Error(this.response);
+      error.code = this.status;
+    }
+  };
+  xhr.onerror = function () {
+    reject(new Error("Network Error"));
+  };
+  xhr.send(fileFetch);
+}
+
+createElements = (origFile) => {
+  const imgWrap = document.createElement('div'),
+    img = document.createElement('img'),
+    progressBar = document.createElement('progress');
+  imgWrap.classList.add('imgWrap');
+  img.file = origFile;
+  imgWrap.append(img)
+  imgWrap.append(progressBar)
+  progressBar.setAttribute('min', 0)
+  progressBar.setAttribute('max', 100)
+  gallery.appendChild(imgWrap)
+  return [img, progressBar]
 }
 
 function addThumbnail(origFile) {
-  const img = document.createElement('img'),
-    progressBar = document.createElement('progress');
-  progressBar.setAttribute('min', 0)
-  progressBar.setAttribute('max', 100)
-  img.file = origFile;
-  gallery.appendChild(img);
-  gallery.appendChild(progressBar)
+  let [img, progressBar] = createElements(origFile)
   progressbars.push(progressBar)
-  console.log(progressbars)
   const reader = new FileReader();
   reader.onload = (function (aImg) {
     return function (e) {
